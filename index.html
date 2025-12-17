@@ -17,6 +17,10 @@
       --eu:#16a34a;
       --nat:#f59e0b;
       --partial:#60a5fa;
+
+      /* NEW: highlight "in_process" / "announced" status */
+      --progress:#93c5fd;
+
       --none:#d1d5db;
       --unknown:#e5e7eb;
     }
@@ -226,8 +230,8 @@
       margin:0;
       padding-left:16px;
       color:var(--ink);
-      font-size:13px;
-      line-height:1.5;
+      font-size: 13px;
+      line-height: 1.5;
     }
   </style>
 </head>
@@ -238,16 +242,23 @@
   <header>
     <h1>Waste & Circular Economy Frameworks — Interactive Hover Map</h1>
     <p class="sub">
-      Hover a country to view a compact, audit-safe summary. Colors represent the requirement or the
-      <strong>WasteFramework</strong>. Where available, the tooltip includes source links for traceability.
+      Hover a country to view a compact, audit-safe summary. Colors represent <strong>WasteFramework_type</strong>.
+      Countries with <strong>ISSB_status</strong> marked <em>in_process</em> or <em>announced</em> are highlighted in light blue.
+      Where available, the tooltip includes source links for traceability.
     </p>
 
     <div class="legend" aria-label="Legend">
       <span class="badge"><span class="swatch" style="background:var(--eu);"></span>EU_directive</span>
       <span class="badge"><span class="swatch" style="background:var(--nat);"></span>national_equivalent</span>
       <span class="badge"><span class="swatch" style="background:var(--partial);"></span>partial / strategy_only</span>
+      <span class="badge"><span class="swatch" style="background:var(--progress);"></span>ISSB in_process / announced</span>
       <span class="badge"><span class="swatch" style="background:var(--none);"></span>none</span>
       <span class="badge"><span class="swatch" style="background:var(--unknown);"></span>unknown</span>
+    </div>
+
+    <div class="downloads">
+      <a class="btn" href="./csrd_issb_gri_waste_circular_frameworks_iso.json" download>Download JSON</a>
+      <a class="btn" href="./csrd_issb_gri_waste_circular_frameworks_iso.csv" download>Download CSV</a>
     </div>
 
     <div class="note">
@@ -377,7 +388,11 @@
     return getComputedStyle(document.documentElement).getPropertyValue(v).trim();
   }
 
-  function color(wfType){
+  // NEW: highlight ISSB in_process/announced in light-blue, otherwise color by WasteFramework_type
+  function color(wfType, issbStatus){
+    if (issbStatus === "in_process" || issbStatus === "announced") {
+      return getCss("--progress");
+    }
     switch (wfType) {
       case "EU_directive": return getCss("--eu");
       case "national_equivalent": return getCss("--nat");
@@ -442,11 +457,9 @@
     const pad = 12;
     const rect = chart.getBoundingClientRect();
 
-    // position relative to chart
     let x = evt.clientX - rect.left + pad;
     let y = evt.clientY - rect.top + pad;
 
-    // clamp inside chart bounds
     const tipW = tooltip.offsetWidth || 320;
     const tipH = tooltip.offsetHeight || 160;
 
@@ -480,7 +493,7 @@
       .attr("fill", f => {
         const id = String(f.id).padStart(3, "0");
         const d = index.get(id);
-        return d ? color(d.WasteFramework_type) : getCss("--unknown");
+        return d ? color(d.WasteFramework_type, d.ISSB_status) : getCss("--unknown");
       })
       .attr("d", geoPath)
       .on("mousemove", moveTooltip)
@@ -496,3 +509,4 @@
 </script>
 </body>
 </html>
+
