@@ -3,59 +3,352 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Framework Hover Map</title>
+  <title>Waste & Circular Economy Frameworks — Hover Map</title>
+
   <style>
-    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 0; padding: 16px; }
-    #wrap { max-width: 1200px; margin: 0 auto; }
-    #chart { position: relative; }
-    svg { width: 100%; height: auto; border: 1px solid #e5e7eb; border-radius: 10px; }
-    .country { cursor: pointer; stroke: #fff; stroke-width: 0.4; }
-    .tooltip {
-      position: absolute;
-      display: none;
-      min-width: 260px;
-      max-width: 360px;
-      background: rgba(17, 24, 39, 0.96);
-      color: #fff;
+    :root{
+      --bg:#ffffff;
+      --ink:#111827;
+      --muted:#6b7280;
+      --border:#e5e7eb;
+      --panel:#f9fafb;
+      --shadow: 0 10px 25px rgba(0,0,0,.18);
+
+      --eu:#16a34a;
+      --nat:#f59e0b;
+      --partial:#60a5fa;
+      --none:#d1d5db;
+      --unknown:#e5e7eb;
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      margin: 0;
+      padding: 18px 16px;
+      background: var(--bg);
+      color: var(--ink);
+    }
+
+    #wrap{ max-width: 1200px; margin: 0 auto; }
+
+    header{
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: #fff;
+      padding: 14px 14px;
+    }
+
+    h1{
+      margin: 0;
+      font-size: 18px;
+      font-weight: 900;
+      letter-spacing: -0.01em;
+    }
+
+    h3{
+      margin: 0 0 8px;
+      font-size: 16px;
+      font-weight: 900;
+      letter-spacing: -0.01em;
+    }
+
+    .sub{
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+      max-width: 980px;
+    }
+
+    .legend{
+      display:flex;
+      flex-wrap:wrap;
+      gap: 10px;
+      margin-top: 12px;
+      font-size: 12px;
+      color: var(--ink);
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 6px 10px;
+      background: var(--panel);
+    }
+
+    .swatch{
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      display:inline-block;
+      border: 1px solid rgba(0,0,0,.12);
+    }
+
+    .muted{ color: var(--muted); }
+
+    .note{
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .downloads{
+      margin-top: 10px;
+      display:flex;
+      gap: 10px;
+      flex-wrap:wrap;
+    }
+
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
       padding: 10px 12px;
       border-radius: 10px;
+      border: 1px solid var(--border);
+      background:#fff;
+      color: var(--ink);
+      text-decoration:none;
+      font-size: 13px;
+      cursor:pointer;
+    }
+    .btn:hover{ background: var(--panel); }
+
+    .section{
+      padding: 16px 0 0;
+    }
+
+    /* Map area */
+    #chart{
+      position: relative;
+      margin-top: 14px;
+    }
+
+    svg{
+      width: 100%;
+      height: auto;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: #fff;
+      display:block;
+    }
+
+    .country{
+      cursor: pointer;
+      stroke:#fff;
+      stroke-width: .45;
+    }
+
+    .tooltip{
+      position:absolute;
+      display:none;
+      min-width: 260px;
+      max-width: 380px;
+      background: rgba(17,24,39,.96);
+      color:#fff;
+      padding: 10px 12px;
+      border-radius: 12px;
       font-size: 12px;
       line-height: 1.35;
-      pointer-events: none;
-      box-shadow: 0 10px 25px rgba(0,0,0,.25);
+      pointer-events:none;
+      box-shadow: var(--shadow);
+      z-index: 20;
     }
-    .tooltip .title { font-weight: 700; font-size: 13px; margin-bottom: 6px; }
-    .row { display: flex; justify-content: space-between; gap: 10px; }
-    .k { opacity: .8; }
-    .v { font-weight: 600; text-align: right; }
-    .links a { color: #93c5fd; text-decoration: none; word-break: break-all; }
-    .links a:hover { text-decoration: underline; }
-    .muted { opacity: .75; margin-top: 6px; font-size: 11px; }
-    .legend { display: flex; flex-wrap: wrap; gap: 10px; margin: 12px 0 0; font-size: 12px; }
-    .swatch { width: 12px; height: 12px; border-radius: 3px; display: inline-block; margin-right: 6px; border: 1px solid rgba(0,0,0,.12); }
+
+    .tooltip .title{
+      font-weight: 900;
+      font-size: 13px;
+      margin-bottom: 6px;
+    }
+
+    .row{
+      display:flex;
+      justify-content:space-between;
+      gap: 10px;
+      margin-top: 3px;
+    }
+
+    .k{ opacity:.78; }
+    .v{ font-weight: 700; text-align:right; }
+
+    .links{
+      margin-top: 8px;
+    }
+    .links a{
+      color: #93c5fd;
+      text-decoration:none;
+      word-break: break-all;
+    }
+    .links a:hover{ text-decoration:underline; }
+
+    /* Use-cases layout */
+    .uc-grid{
+      display:grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+    @media (max-width: 980px){
+      .uc-grid{ grid-template-columns: 1fr; }
+    }
+    .uc-card{
+      border:1px solid var(--border);
+      border-radius:14px;
+      background:#fff;
+      padding:12px;
+    }
+    .uc-title{
+      font-weight:900;
+      font-size:14px;
+      margin-bottom:6px;
+    }
+    .uc-text{
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.5;
+      margin-bottom:10px;
+    }
+    .uc-q{
+      border-top:1px solid var(--border);
+      padding-top:10px;
+    }
+    .uc-qh{
+      font-size:12px;
+      color:var(--muted);
+      font-weight:800;
+      margin-bottom:6px;
+    }
+    .uc-list{
+      margin:0;
+      padding-left:16px;
+      color:var(--ink);
+      font-size:13px;
+      line-height:1.5;
+    }
   </style>
 </head>
+
 <body>
 <div id="wrap">
-  <h2>Waste & Circular Economy Frameworks — Hover Map</h2>
-  <p style="margin-top:-6px; color:#374151; max-width: 980px;">
-    Hover over the country to see an audit-safe summary. Colors represent <strong>Waste and ESG Frameworks</strong>.
-  </p>
 
-  <div class="legend" aria-label="Legend">
-    <div><span class="swatch" style="background:#16a34a;"></span>EU_directive</div>
-    <div><span class="swatch" style="background:#f59e0b;"></span>national_equivalent</div>
-    <div><span class="swatch" style="background:#60a5fa;"></span>partial</div>
-    <div><span class="swatch" style="background:#d1d5db;"></span>none</div>
-  </div>
+  <header>
+    <h1>Waste & Circular Economy Frameworks — Interactive Hover Map</h1>
+    <p class="sub">
+      Hover a country to view a compact, audit-safe summary. Colors represent the dataset field
+      <strong>WasteFramework_type</strong>. Where available, the tooltip includes source links for traceability.
+    </p>
 
+    <div class="legend" aria-label="Legend">
+      <span class="badge"><span class="swatch" style="background:var(--eu);"></span>EU_directive</span>
+      <span class="badge"><span class="swatch" style="background:var(--nat);"></span>national_equivalent</span>
+      <span class="badge"><span class="swatch" style="background:var(--partial);"></span>partial / strategy_only</span>
+      <span class="badge"><span class="swatch" style="background:var(--none);"></span>none</span>
+      <span class="badge"><span class="swatch" style="background:var(--unknown);"></span>unknown</span>
+    </div>
+
+    <div class="downloads">
+      <!-- If your files are inside /data, change href to ./data/<filename> -->
+      <a class="btn" href="./csrd_issb_gri_waste_circular_frameworks_iso.json" download>Download JSON</a>
+      <a class="btn" href="./csrd_issb_gri_waste_circular_frameworks_iso.csv" download>Download CSV</a>
+    </div>
+
+    <div class="note">
+      Notes: This visualization is a data-driven summary and does not constitute legal advice.
+      Classification fields reflect this dataset’s taxonomy; verify using linked primary sources where provided.
+    </div>
+  </header>
+
+  <!-- USE-CASES -->
+  <section id="use-cases" class="section" style="padding-top: 6px;">
+    <h3>Sample use-cases</h3>
+    <p class="muted" style="max-width: 980px; margin: 0;">
+      Examples of how teams use this dataset for decision support and traceability. Classifications shown on the map
+      reflect the dataset’s taxonomy; verify using linked primary sources where provided.
+    </p>
+
+    <div class="uc-grid" style="margin-top: 12px;">
+      <div class="uc-card">
+        <div class="uc-title">ESG reporting & strategy</div>
+        <div class="uc-text">
+          Compare jurisdictional framework indicators across operating countries and identify where EU-aligned
+          or national-equivalent approaches appear in the dataset.
+        </div>
+        <div class="uc-q">
+          <div class="uc-qh">Typical questions</div>
+          <ul class="uc-list">
+            <li>Where do EU-aligned waste or circular economy frameworks apply?</li>
+            <li>Which countries show ISSB progress versus no identified status?</li>
+            <li>Where does the dataset include source links vs. gaps?</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="uc-card">
+        <div class="uc-title">Packaging & materials compliance</div>
+        <div class="uc-text">
+          Screen markets for waste and circular economy frameworks that may affect packaging design constraints,
+          EoL assumptions, and compliance planning.
+        </div>
+        <div class="uc-q">
+          <div class="uc-qh">Typical questions</div>
+          <ul class="uc-list">
+            <li>Which markets show EU directive applicability in the dataset?</li>
+            <li>Where are frameworks marked partial or strategy-only?</li>
+            <li>Which countries may warrant deeper legal review for packaging claims?</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="uc-card">
+        <div class="uc-title">Procurement & supplier due diligence</div>
+        <div class="uc-text">
+          Overlay supplier geography with regulatory context to prioritize documentation requests and risk-based diligence.
+        </div>
+        <div class="uc-q">
+          <div class="uc-qh">Typical questions</div>
+          <ul class="uc-list">
+            <li>Which supplier regions operate under higher-regulation frameworks?</li>
+            <li>Where should enhanced documentation be requested?</li>
+            <li>Which locations may face near-term policy change?</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="uc-card">
+        <div class="uc-title">Audits & assurance preparation</div>
+        <div class="uc-text">
+          Use consistent classifications and linked sources to support internal reviews, audit readiness, and traceability.
+        </div>
+        <div class="uc-q">
+          <div class="uc-qh">Typical questions</div>
+          <ul class="uc-list">
+            <li>What regulatory assumptions are implied by our country classifications?</li>
+            <li>Which entries include authoritative sources we can cite?</li>
+            <li>Where do we need to fill source gaps before assurance?</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="note" style="margin-top: 10px;">
+      Note: This visualization is for information and data exploration and does not constitute legal advice.
+    </div>
+  </section>
+
+  <!-- MAP -->
   <div id="chart">
     <div id="tooltip" class="tooltip" role="dialog" aria-hidden="true"></div>
   </div>
 
-  <p class="muted">
-    Notes: This visualization is a data-driven summary and not legal advice. Use the linked sources for verification and traceability.
-  </p>
+  <div class="note" style="margin-top: 12px;">
+    Tip: If you deploy this on GitHub Pages, keep the dataset file paths consistent with the links above.
+    If your data lives in <code>/data</code>, update both the download links and the <code>fetch()</code> paths.
+  </div>
+
 </div>
 
 <!-- D3 + TopoJSON from CDN -->
@@ -67,10 +360,17 @@
   const tooltip = document.getElementById("tooltip");
   const chart = document.getElementById("chart");
 
-  // 1) Load your dataset (local file)
-  const data = await fetch("./csrd_issb_gri_waste_circular_frameworks_iso.json").then(r => r.json());
+  // ----------------------------
+  // Update these paths if needed
+  // ----------------------------
+  const DATA_JSON_PATH = "./csrd_issb_gri_waste_circular_frameworks_iso.json";
+  // If your JSON lives under /data, use:
+  // const DATA_JSON_PATH = "./data/csrd_issb_gri_waste_circular_frameworks_iso.json";
 
-  // Index by ISO numeric (3-digit string), because world-atlas uses numeric ids for country features.
+  // 1) Load dataset (local)
+  const data = await fetch(DATA_JSON_PATH).then(r => r.json());
+
+  // Index by ISO numeric (3-digit string); matches world-atlas feature ids
   const index = new Map(data.map(d => [String(d.ISO_N3).padStart(3, "0"), d]));
 
   // 2) Load world geometry (TopoJSON) from CDN
@@ -79,45 +379,66 @@
 
   // 3) Set up SVG
   const width = 1100, height = 560;
-  const svg = d3.select(chart).append("svg")
-    .attr("viewBox", `0 0 ${width} ${height}`);
+  const svg = d3.select(chart).append("svg").attr("viewBox", `0 0 ${width} ${height}`);
 
   const projection = d3.geoNaturalEarth1().fitSize([width, height], { type: "Sphere" });
-  const path = d3.geoPath(projection);
+  const geoPath = d3.geoPath(projection);
 
-  const color = (wfType) => {
+  function getCss(v){
+    return getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+  }
+
+  function color(wfType){
     switch (wfType) {
-      case "EU_directive": return "#16a34a";
-      case "national_equivalent": return "#f59e0b";
-      case "partial": return "#60a5fa";
-      case "strategy_only": return "#60a5fa";
-      case "none": return "#d1d5db";
-      default: return "#e5e7eb";
+      case "EU_directive": return getCss("--eu");
+      case "national_equivalent": return getCss("--nat");
+      case "partial": return getCss("--partial");
+      case "strategy_only": return getCss("--partial");
+      case "none": return getCss("--none");
+      default: return getCss("--unknown");
     }
-  };
+  }
 
   function escapeHtml(s) {
-    return String(s ?? "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;', "'":'&#039;'}[c]));
+    return String(s ?? "").replace(/[&<>"']/g, c => ({
+      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+    }[c]));
+  }
+
+  function linkRow(label, url){
+    if (!url) return "";
+    const u = escapeHtml(url);
+    return `
+      <div class="links">
+        <div class="k" style="opacity:.85;">${escapeHtml(label)}:</div>
+        <a href="${u}" target="_blank" rel="noopener">${u}</a>
+      </div>
+    `;
   }
 
   function makeTooltipHtml(d) {
-    // Audit-safe wording: factual, classification explicitly labeled as dataset field.
     const waste = d.WasteFramework_type || "unknown";
-    const circ = d.CircularEconomyFramework_type || "unknown";
-    const issb = d.ISSB_status || "unknown";
-
-    const wfSrc = d.WasteFramework_source ? `<div class="links"><span class="k">Waste source:</span><br><a href="${escapeHtml(d.WasteFramework_source)}" target="_blank" rel="noopener">${escapeHtml(d.WasteFramework_source)}</a></div>` : "";
-    const ceSrc = d.CircularEconomyFramework_source ? `<div class="links" style="margin-top:6px;"><span class="k">Circular source:</span><br><a href="${escapeHtml(d.CircularEconomyFramework_source)}" target="_blank" rel="noopener">${escapeHtml(d.CircularEconomyFramework_source)}</a></div>` : "";
-    const issbSrc = d.ISSB_source ? `<div class="links" style="margin-top:6px;"><span class="k">ISSB source:</span><br><a href="${escapeHtml(d.ISSB_source)}" target="_blank" rel="noopener">${escapeHtml(d.ISSB_source)}</a></div>` : "";
+    const circ  = d.CircularEconomyFramework_type || "unknown";
+    const issb  = d.ISSB_status || "unknown";
 
     return `
-      <div class="title">${escapeHtml(d.Country)} <span style="opacity:.75; font-weight:600;">(${escapeHtml(d.ISO2 || "")})</span></div>
-      <div class="row"><div class="k">Waste framework type</div><div class="v">${escapeHtml(waste)}</div></div>
-      <div class="row"><div class="k">Circular framework type</div><div class="v">${escapeHtml(circ)}</div></div>
-      <div class="row"><div class="k">ISSB status</div><div class="v">${escapeHtml(issb)}</div></div>
+      <div class="title">
+        ${escapeHtml(d.Country)} <span style="opacity:.75;font-weight:700;">(${escapeHtml(d.ISO2 || "")})</span>
+      </div>
+
+      <div class="row"><div class="k">WasteFramework_type</div><div class="v">${escapeHtml(waste)}</div></div>
+      <div class="row"><div class="k">CircularEconomyFramework_type</div><div class="v">${escapeHtml(circ)}</div></div>
+      <div class="row"><div class="k">ISSB_status</div><div class="v">${escapeHtml(issb)}</div></div>
       <div class="row"><div class="k">GRI</div><div class="v">voluntary standard</div></div>
-      ${wfSrc}${ceSrc}${issbSrc}
-      <div class="muted">Classification fields reflect this dataset’s taxonomy; verify using linked primary sources where provided.</div>
+
+      ${linkRow("WasteFramework_source", d.WasteFramework_source)}
+      ${linkRow("CircularEconomyFramework_source", d.CircularEconomyFramework_source)}
+      ${linkRow("ISSB_source", d.ISSB_source)}
+      ${linkRow("GRI_source", d.GRI_source)}
+
+      <div class="note" style="color:rgba(255,255,255,.78); margin-top:10px;">
+        Classification fields reflect this dataset’s taxonomy; verify using linked primary sources where provided.
+      </div>
     `;
   }
 
@@ -131,11 +452,23 @@
   function moveTooltip(evt) {
     const pad = 12;
     const rect = chart.getBoundingClientRect();
-    const x = evt.clientX - rect.left + pad;
-    const y = evt.clientY - rect.top + pad;
+
+    // position relative to chart
+    let x = evt.clientX - rect.left + pad;
+    let y = evt.clientY - rect.top + pad;
+
+    // clamp inside chart bounds
+    const tipW = tooltip.offsetWidth || 320;
+    const tipH = tooltip.offsetHeight || 160;
+
+    const maxX = rect.width - tipW - pad;
+    const maxY = rect.height - tipH - pad;
+
+    x = Math.max(pad, Math.min(x, maxX));
+    y = Math.max(pad, Math.min(y, maxY));
 
     tooltip.style.left = x + "px";
-    tooltip.style.top = y + "px";
+    tooltip.style.top  = y + "px";
   }
 
   function hideTooltip() {
@@ -143,11 +476,13 @@
     tooltip.setAttribute("aria-hidden", "true");
   }
 
-  // 4) Draw map
-  svg.append("path").datum({ type: "Sphere" })
-    .attr("d", path)
-    .attr("fill", "#f9fafb");
+  // Background (ocean)
+  svg.append("path")
+    .datum({ type: "Sphere" })
+    .attr("d", geoPath)
+    .attr("fill", getCss("--panel"));
 
+  // Countries
   svg.append("g")
     .selectAll("path")
     .data(countries)
@@ -156,11 +491,11 @@
       .attr("fill", f => {
         const id = String(f.id).padStart(3, "0");
         const d = index.get(id);
-        return d ? color(d.WasteFramework_type) : "#e5e7eb";
+        return d ? color(d.WasteFramework_type) : getCss("--unknown");
       })
-      .attr("d", path)
-      .on("mousemove", function (evt) { moveTooltip(evt); })
-      .on("mouseenter", function (evt, f) {
+      .attr("d", geoPath)
+      .on("mousemove", moveTooltip)
+      .on("mouseenter", (evt, f) => {
         const id = String(f.id).padStart(3, "0");
         const d = index.get(id);
         if (!d) return;
