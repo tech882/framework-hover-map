@@ -383,9 +383,8 @@
     return getComputedStyle(document.documentElement).getPropertyValue(v).trim();
   }
 
-  // NEW: highlight ISSB in_process/announced in light-blue, otherwise color by WasteFramework_type
   function color(wfType, issbStatus){
-    if (issbStatus === "in_process" || issbStatus === "announced") {
+    if (issbStatus === "in_process_or_announced") {
       return getCss("--progress");
     }
     switch (wfType) {
@@ -397,6 +396,7 @@
       default: return getCss("--unknown");
     }
   }
+
 
   function escapeHtml(s) {
     return String(s ?? "").replace(/[&<>"']/g, c => ({
