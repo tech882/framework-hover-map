@@ -384,11 +384,18 @@
   }
 
   function color(wfType, issbStatus){
+    // 1) EU_directive has top priority
+    if (wfType === "EU_directive") {
+      return getCss("--eu");
+    }
+  
+    // 2) Only if NOT EU_directive, allow ISSB highlight
     if (issbStatus === "in_process_or_announced") {
       return getCss("--progress");
     }
+  
+    // 3) Otherwise, color by waste framework type
     switch (wfType) {
-      case "EU_directive": return getCss("--eu");
       case "national_equivalent": return getCss("--nat");
       case "partial": return getCss("--partial");
       case "strategy_only": return getCss("--partial");
@@ -396,7 +403,6 @@
       default: return getCss("--unknown");
     }
   }
-
 
   function escapeHtml(s) {
     return String(s ?? "").replace(/[&<>"']/g, c => ({
